@@ -108,9 +108,9 @@ The software has not been certified as a medical device and, therefore, must not
 If you found this work useful, consider citing the repository or one of the following publications:
 
 > @misc{Mustonen2023,
-  author={*ADD AUTHORS*},
-  title={*ADD TITLE*},
-  howpublished={GitHub, *ADD DATE*. URL: \url{https://github.com/*ADD URL*}}, 
+  author={Henrik Mustonen},
+  title={DLLabelsCT},
+  howpublished={GitHub, 2023-08-24, URL: \url{https://github.com/MIPT-Oulu/DLLabelsCT}}, 
   year={2023}, 
-  note={{DOI}: *ADD DOI IF SUCH EXISTS*}
+  note={}
 }
