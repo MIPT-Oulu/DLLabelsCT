@@ -1291,7 +1291,10 @@ class DLLabelsCT(QMainWindow):
                         self.progressBar.hide()
                         self.currentDICOMStack = None
                         return 0
-                    self.currentStudyID = ds.StudyID
+                    try:
+                        self.currentStudyID = ds.StudyID
+                    except AttributeError:
+                        self.currentStudyID = 0
                     out = adjust_image(ds, self.dicomWindowCenter, self.dicomWindowWidth)
                     if i == 0:
                         self.currentDICOMStack = np.zeros((len(self.dicoms), out.shape[0], out.shape[1]))
