@@ -182,13 +182,19 @@ class DLLabelsCT(QMainWindow):
         agDevice.triggered.connect(self.changeDevice)
 
         optionsMenu = menubar.addMenu('Options')
+        selectDICOMPathShowingAct = QAction('Show DICOM path', self, checkable=True)
+        selectSegmentationPathShowingAct = QAction('Show segmentation model path', self, checkable=True)
+        selectSaveFolderShowingAct = QAction('Show save folder path', self, checkable=True)
         selectPatientIDShowingAct = QAction('Show patient ID', self, checkable=True)
         selectRemovingAct = QAction('Remove outliers after segmentation/when saving', self, checkable=True)
         selectFillingAct = QAction('Automatically fill holes in masks', self, checkable=True)
         selectImageSavingAct = QAction('Save images when annotating', self, checkable=True)
         selectImageFlippingAct = QAction('Save flipped images when annotating', self, checkable=True)
         self.agOptions = QActionGroup(self)
-        showing = self.agOptions.addAction(selectPatientIDShowingAct)
+        showingDICOMPath = self.agOptions.addAction(selectDICOMPathShowingAct)
+        showingSegmentationPath = self.agOptions.addAction(selectSegmentationPathShowingAct)
+        showingSaveFolderPath = self.agOptions.addAction(selectSaveFolderShowingAct)
+        showingPatientID = self.agOptions.addAction(selectPatientIDShowingAct)
         removing = self.agOptions.addAction(selectRemovingAct)
         filling = self.agOptions.addAction(selectFillingAct)
         savingImages = self.agOptions.addAction(selectImageSavingAct)
@@ -196,9 +202,17 @@ class DLLabelsCT(QMainWindow):
         self.agOptions.setExclusive(False)
         savingImages.setChecked(True)
         savingFlipped.setChecked(True)
-        optionsMenu.addAction(showing)
+        showingDICOMPath.setChecked(True)
+        showingSegmentationPath.setChecked(True)
+        showingSaveFolderPath.setChecked(True)
+        optionsMenu.addAction(showingDICOMPath)
+        optionsMenu.addAction(showingSegmentationPath)
+        optionsMenu.addAction(showingSaveFolderPath)
+        optionsMenu.addAction(showingPatientID)
+        optionsMenu.addSeparator()
         optionsMenu.addAction(removing)
         optionsMenu.addAction(filling)
+        optionsMenu.addSeparator()
         optionsMenu.addAction(savingImages)
         optionsMenu.addAction(savingFlipped)
         self.agOptions.triggered.connect(self.changeOptions)
@@ -513,22 +527,34 @@ class DLLabelsCT(QMainWindow):
     def changeOptions(self):
 
         if self.agOptions.actions()[0].isChecked():
+            self.currentDICOMPathLabel.show()
+        else:
+            self.currentDICOMPathLabel.hide()
+        if self.agOptions.actions()[1].isChecked():
+            self.currentSegmentationModelPathLabel.show()
+        else:
+            self.currentSegmentationModelPathLabel.hide()
+        if self.agOptions.actions()[2].isChecked():
+            self.currentSavePathLabel.show()
+        else:
+            self.currentSavePathLabel.hide()
+        if self.agOptions.actions()[3].isChecked():
             self.currentPatientIDLabel.show()
         else:
             self.currentPatientIDLabel.hide()
-        if self.agOptions.actions()[1].isChecked():
+        if self.agOptions.actions()[4].isChecked():
             self.removeOutliers = True
         else:
             self.removeOutliers = False
-        if self.agOptions.actions()[2].isChecked():
+        if self.agOptions.actions()[5].isChecked():
             self.fillContours = True
         else:
             self.fillContours = False
-        if self.agOptions.actions()[3].isChecked():
+        if self.agOptions.actions()[6].isChecked():
             self.saveImages = True
         else:
             self.saveImages = False
-        if self.agOptions.actions()[4].isChecked():
+        if self.agOptions.actions()[7].isChecked():
             self.saveFlipped = True
         else:
             self.saveFlipped = False
