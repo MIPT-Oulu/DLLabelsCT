@@ -55,6 +55,7 @@ Menubar options:
   - Automatically fill holes in masks: Fills holes when drawing
   - Save images when annotating: When annotating a folder, saves the scans axial slices as PNG images
   - Save flipped images when annotating: Saves flipped versions of the images in a separate folder
+  - Show DICOMs by filename order: Whether to show DICOMs by filename order (if checked) or by DICOMs' InstanceNumber order (if unchecked)
 - Drawing options: Change mouse left click function and shape and size of when drawing labels
   - Selecting: Shows the clicked slice in the other views
   - Drawing: Clicking and dragging draws the currently selected label on the mask
