@@ -529,7 +529,7 @@ class DLLabelsCT(QMainWindow):
         elif act.text() == "CPU":
             self.device = "cpu"
 
-    def changeOptions(self):
+    def changeOptions(self, act):
 
         if self.agOptions.actions()[0].isChecked():
             self.currentDICOMPathLabel.show()
@@ -565,10 +565,9 @@ class DLLabelsCT(QMainWindow):
             self.saveFlipped = False
         if self.agOptions.actions()[8].isChecked():
             self.useFileOrder = True
-            self.currentDICOMStack = None
-            self.showImages()
         else:
             self.useFileOrder = False
+        if act.text() == 'Show DICOMs by filename order':
             self.currentDICOMStack = None
             self.showImages()
 
