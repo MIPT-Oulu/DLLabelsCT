@@ -992,9 +992,6 @@ class DLLabelsCT(QMainWindow):
                 study_id = Path(self.DICOMFolderPath).name
                 save_dir = Path(self.saveDirectory)
                 os.makedirs(save_dir / study_id / maskType, exist_ok=True)
-                if self.segmentationModelPath is not None:
-                    model_name = self.segmentationModelPath[0].parent.name
-                    os.makedirs(save_dir / study_id / maskType / model_name, exist_ok=True)
                 mask_stack = self.currentMaskStack[maskType].copy()
                 if self.removeOutliers:
                     mask_stack = remove_outliers(mask_stack)
@@ -1003,10 +1000,7 @@ class DLLabelsCT(QMainWindow):
                     mask_stack = mask_stack * 255
                 for slice_num, slice in enumerate(mask_stack):
                     mask_filename = study_id + "_" + str(slice_num) + ".png"
-                    if self.segmentationModelPath is not None:
-                        mask_save_path = save_dir / study_id / maskType / model_name / mask_filename
-                    else:
-                        mask_save_path = save_dir / study_id / maskType / mask_filename
+                    mask_save_path = save_dir / study_id / maskType / mask_filename
                     cv2.imwrite(str(mask_save_path), slice)
                     self.progressBar.setValue(int(slice_num * (100 / len(mask_stack))))
                 self.statusbar.showMessage("Saving complete")
