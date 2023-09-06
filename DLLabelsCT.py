@@ -50,6 +50,7 @@ class DLLabelsCT(QMainWindow):
         self.saveFlipped = True
         self.removeOutliers = False
         self.fillContours = False
+        self.useFileOrder = False
         self.device = "cuda"
         self.flip = {"Axial": False, "Coronal": False, "Sagittal": False}
         self.axialImageQt = None
@@ -190,6 +191,7 @@ class DLLabelsCT(QMainWindow):
         selectFillingAct = QAction('Automatically fill holes in masks', self, checkable=True)
         selectImageSavingAct = QAction('Save images when annotating', self, checkable=True)
         selectImageFlippingAct = QAction('Save flipped images when annotating', self, checkable=True)
+        useFileOrderAct = QAction('Show DICOMs by filename order', self, checkable=True)
         self.agOptions = QActionGroup(self)
         showingDICOMPath = self.agOptions.addAction(selectDICOMPathShowingAct)
         showingSegmentationPath = self.agOptions.addAction(selectSegmentationPathShowingAct)
@@ -199,6 +201,7 @@ class DLLabelsCT(QMainWindow):
         filling = self.agOptions.addAction(selectFillingAct)
         savingImages = self.agOptions.addAction(selectImageSavingAct)
         savingFlipped = self.agOptions.addAction(selectImageFlippingAct)
+        fileOrder = self.agOptions.addAction(useFileOrderAct)
         self.agOptions.setExclusive(False)
         savingImages.setChecked(True)
         savingFlipped.setChecked(True)
@@ -215,6 +218,8 @@ class DLLabelsCT(QMainWindow):
         optionsMenu.addSeparator()
         optionsMenu.addAction(savingImages)
         optionsMenu.addAction(savingFlipped)
+        optionsMenu.addSeparator()
+        optionsMenu.addAction(fileOrder)
         self.agOptions.triggered.connect(self.changeOptions)
 
         drawingMenu = menubar.addMenu('Drawing options')
@@ -558,6 +563,14 @@ class DLLabelsCT(QMainWindow):
             self.saveFlipped = True
         else:
             self.saveFlipped = False
+        if self.agOptions.actions()[8].isChecked():
+            self.useFileOrder = True
+            self.currentDICOMStack = None
+            self.showImages()
+        else:
+            self.useFileOrder = False
+            self.currentDICOMStack = None
+            self.showImages()
 
     def changeDrawingErasing(self, act):
 
@@ -1324,7 +1337,13 @@ class DLLabelsCT(QMainWindow):
                     out = adjust_image(ds, self.dicomWindowCenter, self.dicomWindowWidth)
                     if i == 0:
                         self.currentDICOMStack = np.zeros((len(self.dicoms), out.shape[0], out.shape[1]))
-                    self.currentDICOMStack[i, :, :] = out.astype(np.uint16)
+                    if self.useFileOrder:
+                        self.currentDICOMStack[i, :, :] = out.astype(np.uint16)
+                    else:
+                        try:
+                            self.currentDICOMStack[ds.InstanceNumber-1, :, :] = out.astype(np.uint16)
+                        except AttributeError:
+                            self.currentDICOMStack[i, :, :] = out.astype(np.uint16)
                     self.progressBar.setValue(int(i * (100 / len(self.dicoms))))
             except ValueError:
                 self.statusbar.showMessage("Invalid DICOMs (wrong shape)!")
