@@ -1337,6 +1337,9 @@ class DLLabelsCT(QMainWindow):
                             self.currentDICOMStack[ds.InstanceNumber-1, :, :] = out.astype(np.uint16)
                         except AttributeError:
                             self.currentDICOMStack[i, :, :] = out.astype(np.uint16)
+                        except IndexError:
+                            self.statusbar.showMessage("Invalid DICOM index!")
+                            continue
                     self.progressBar.setValue(int(i * (100 / len(self.dicoms))))
             except ValueError:
                 self.statusbar.showMessage("Invalid DICOMs (wrong shape)!")
