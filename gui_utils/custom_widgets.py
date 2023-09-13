@@ -64,7 +64,10 @@ class CTGraphicsScene(QGraphicsScene):
             if (self.parent.clickType["Drawing"] or self.parent.clickType["Erasing"]) and self.imageType == "axial" and self.drawnMaskType is not None and self.maskShown and self.parent.currentMaskStack[self.drawnMaskType] is not None and self.parent.showMasks and self.imageType == "axial" and self.mask[self.drawnMaskType] is not None and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1]:
                 self.drawing = True
                 self.currentMaskIndex = self.parent.axialDICOMIndex
-                self.mask[self.drawnMaskType][self.currentMaskIndex, y - self.drawingLow:y + self.drawingHigh, x - self.drawingLow:x + self.drawingHigh] = self.drawingShape
+                try:
+                    self.mask[self.drawnMaskType][self.currentMaskIndex, y - self.drawingLow:y + self.drawingHigh, x - self.drawingLow:x + self.drawingHigh] = self.drawingShape
+                except ValueError:
+                    pass
                 self.parent.drawMask()
             elif self.parent.clickType["Selecting"]:
                 if x < 0 or y < 0:
