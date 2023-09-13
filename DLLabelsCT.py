@@ -1575,14 +1575,10 @@ class DLLabelsCT(QMainWindow):
 
     def setMaskValues(self, mask, maskType):
 
-        x = mask[:, :, 0] > 0
-        mask[x, 0] = self.maskColors[maskType][0]
-        x = mask[:, :, 1] > 0
-        mask[x, 1] = self.maskColors[maskType][1]
-        x = mask[:, :, 2] > 0
-        mask[x, 2] = self.maskColors[maskType][2]
-        x = mask[:, :, 3] > 0
-        mask[x, 3] = self.maskOpacity
+        mask[:, :, 0][mask[:, :, 0] > 0] = self.maskColors[maskType][0]
+        mask[:, :, 1][mask[:, :, 1] > 0] = self.maskColors[maskType][1]
+        mask[:, :, 2][mask[:, :, 2] > 0] = self.maskColors[maskType][2]
+        mask[:, :, 3][mask[:, :, 3] > 0] = self.maskOpacity
 
         return mask
 
