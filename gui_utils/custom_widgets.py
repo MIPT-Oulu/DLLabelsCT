@@ -12,6 +12,7 @@ class CTGraphicsScene(QGraphicsScene):
         self.parent = parent
         self.imageType = imageType
         self.drawing = False
+        self.adjusting = False
         self.maskShown = True
         self.mask = reset_mask_stack(self.parent.currentMaskStack)
         self.drawingSize = 7
@@ -20,6 +21,8 @@ class CTGraphicsScene(QGraphicsScene):
         self.drawingShape = seven_circle
         self.drawnMaskType = None
         self.currentMaskIndex = 0
+        self.adjustX = None
+        self.adjustY = None
 
     def createMask(self, maskType):
         self.mask[maskType] = np.zeros(self.parent.currentDICOMStack.shape)
@@ -58,43 +61,48 @@ class CTGraphicsScene(QGraphicsScene):
                     self.parent.changeAnnotable()
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            x = int(event.scenePos().x())
-            y = int(event.scenePos().y())
-            if (self.parent.clickType["Drawing"] or self.parent.clickType["Erasing"]) and self.imageType == "axial" and self.drawnMaskType is not None and self.maskShown and self.parent.currentMaskStack[self.drawnMaskType] is not None and self.parent.showMasks and self.imageType == "axial" and self.mask[self.drawnMaskType] is not None and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1]:
-                self.drawing = True
-                self.currentMaskIndex = self.parent.axialDICOMIndex
-                try:
-                    self.mask[self.drawnMaskType][self.currentMaskIndex, y - self.drawingLow:y + self.drawingHigh, x - self.drawingLow:x + self.drawingHigh] = self.drawingShape
-                except ValueError:
-                    pass
-                self.parent.drawMask()
-            elif self.parent.clickType["Selecting"]:
-                if x < 0 or y < 0:
-                    x = 0
-                    y = 0
-                if self.imageType == "axial":
-                    self.parent.coronalDICOMIndex = y
-                    self.parent.sagittalDICOMIndex = x
-                    self.parent.coronalSlider.setValue(y)
-                    self.parent.sagittalSlider.setValue(x)
-                    self.parent.updateImages()
-                elif self.imageType == "coronal":
-                    self.parent.axialDICOMIndex = y
-                    self.parent.sagittalDICOMIndex = x
-                    self.parent.axialSlider.setValue(y)
-                    self.parent.sagittalSlider.setValue(x)
-                    self.parent.updateImages()
-                elif self.imageType == "sagittal":
-                    self.parent.axialDICOMIndex = y
-                    self.parent.coronalDICOMIndex = x
-                    self.parent.axialSlider.setValue(y)
-                    self.parent.coronalSlider.setValue(x)
-                    self.parent.updateImages()
+        if self.parent.currentDICOMStack is not None:
+            if event.button() == Qt.MouseButton.LeftButton:
+                x = int(event.scenePos().x())
+                y = int(event.scenePos().y())
+                if (self.parent.clickType["Drawing"] or self.parent.clickType["Erasing"]) and self.imageType == "axial" and self.drawnMaskType is not None and self.maskShown and self.parent.currentMaskStack[self.drawnMaskType] is not None and self.parent.showMasks and self.imageType == "axial" and self.mask[self.drawnMaskType] is not None and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1] and not self.adjusting:
+                    self.drawing = True
+                    self.currentMaskIndex = self.parent.axialDICOMIndex
+                    try:
+                        self.mask[self.drawnMaskType][self.currentMaskIndex, y - self.drawingLow:y + self.drawingHigh, x - self.drawingLow:x + self.drawingHigh] = self.drawingShape
+                    except ValueError:
+                        pass
+                    self.parent.drawMask()
+                elif self.parent.clickType["Selecting"]:
+                    if x < 0 or y < 0:
+                        x = 0
+                        y = 0
+                    if self.imageType == "axial":
+                        self.parent.coronalDICOMIndex = y
+                        self.parent.sagittalDICOMIndex = x
+                        self.parent.coronalSlider.setValue(y)
+                        self.parent.sagittalSlider.setValue(x)
+                        self.parent.updateImages()
+                    elif self.imageType == "coronal":
+                        self.parent.axialDICOMIndex = y
+                        self.parent.sagittalDICOMIndex = x
+                        self.parent.axialSlider.setValue(y)
+                        self.parent.sagittalSlider.setValue(x)
+                        self.parent.updateImages()
+                    elif self.imageType == "sagittal":
+                        self.parent.axialDICOMIndex = y
+                        self.parent.coronalDICOMIndex = x
+                        self.parent.axialSlider.setValue(y)
+                        self.parent.coronalSlider.setValue(x)
+                        self.parent.updateImages()
+            elif event.button() == Qt.MouseButton.RightButton and self.imageType == "axial" and not self.drawing:
+                self.adjustX = int(event.scenePos().x())
+                self.adjustY = int(event.scenePos().y())
+                self.adjusting = True
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
-        if not self.drawing and bool(modifiers == Qt.KeyboardModifier.ControlModifier):
+        if not self.drawing and not self.adjusting and bool(modifiers == Qt.KeyboardModifier.ControlModifier):
             if event.delta() > 0:
                 self.zoomIn()
             elif event.delta() < 0:
@@ -103,18 +111,29 @@ class CTGraphicsScene(QGraphicsScene):
     def mouseMoveEvent(self, event):
         x = int(event.scenePos().x())
         y = int(event.scenePos().y())
-        if self.drawing and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1]:
-            try:
-                self.mask[self.drawnMaskType][self.currentMaskIndex, y - self.drawingLow:y + self.drawingHigh, x - self.drawingLow:x + self.drawingHigh] = self.drawingShape
-            except ValueError:
-                pass
-            self.parent.drawMask()
+        if self.parent.currentDICOMStack is not None:
+            if self.drawing and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1]:
+                try:
+                    self.mask[self.drawnMaskType][self.currentMaskIndex, y - self.drawingLow:y + self.drawingHigh, x - self.drawingLow:x + self.drawingHigh] = self.drawingShape
+                except ValueError:
+                    pass
+                self.parent.drawMask()
+            elif self.adjusting and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1] and self.adjustX is not None and self.adjustY is not None:
+                xChange = x - self.adjustX
+                yChange = self.adjustY - y
+                if -65535 < self.parent.brightness < 65535:
+                    self.parent.brightness += xChange * 1
+                if self.parent.contrast > 0 or (self.parent.contrast <= 0 < yChange):
+                    self.parent.contrast += yChange * 0.0001
 
     def mouseReleaseEvent(self, event):
         if self.drawing:
             self.drawing = False
             if self.parent.fillContours and self.parent.clickType["Drawing"]:
                 self.parent.fillContoursFunc()
+            self.parent.updateImages()
+        if self.adjusting:
+            self.adjusting = False
             self.parent.updateImages()
 
     def zoomIn(self):
