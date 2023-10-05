@@ -87,6 +87,7 @@ Menubar options:
 - Right arrow - Go to next scan (when annotating folders)
 - Ctrl + mouse wheel up | numpad plus - Zoom in
 - Ctrl + mouse wheel down | numpad minus - Zoom out
+- Right-clicking + dragging - Adjust brightness/contrast
 
 ## DLLabelsCT with PyInstaller 
 
