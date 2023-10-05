@@ -32,7 +32,7 @@ DLLabelsCT supports ResNetUNet and ResNetFPN encoder-decoder models for segmenta
 4. (When using a multiclass segmentation model) Set which label corresponds to which class in the models output (if using models with multiple outputs)
 5. Select either a single scan (Select DICOM folder...) or a folder containing multiple scans ("Select folder to annotate...")
 6. (When using a segmentation model) Press the "Do segmentation" button to use the model to generate masks
-7. Annotate the scans by left-clicking and dragging the mouse over the axial view with the "Drawing" option enabled
+7. Annotate the scans by left-clicking and dragging the mouse over the axial view with the "Drawing" option enabled. Brightness and contrast can be adjusted by right-clicking and dragging, dragging left or right to adjust brightness, dragging up or down to adjust contrast. Brightness and contrast are reset when changing slides/exams and images are saved without the brightness/contrast adjustments
 8. (Optional) Use the "Remove outliers from masks" button to remove any unwanted objects in the currently selected label (Note: leaves only the largest object in the mask, if the mask is meant to contain multiple objects, do not use this button)
 9. If labeling a single exam, use the "File/Save masks" option. If labeling a folder, the annotations are saved when changing exams. The annotations can also be manually saved with "File/Save annotations"
 
@@ -106,12 +106,4 @@ The software has not been certified as a medical device and, therefore, must not
 
 ## How to cite
 
-If you found this work useful, consider citing the repository or one of the following publications:
-
-> @misc{Mustonen2023,
-  author={Henrik Mustonen},
-  title={DLLabelsCT},
-  howpublished={GitHub, 2023-08-24, URL: \url{https://github.com/MIPT-Oulu/DLLabelsCT}}, 
-  year={2023}, 
-  note={}
-}
+If you found this work useful, consider citing the repository
