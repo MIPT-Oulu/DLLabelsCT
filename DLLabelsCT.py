@@ -66,6 +66,9 @@ class DLLabelsCT(QMainWindow):
 
         self.maskOpacity = 128
 
+        self.brightness = 0
+        self.contrast = 1.0
+
         centralWidget = QWidget(self)
         self.setCentralWidget(centralWidget)
         centralLayout = QHBoxLayout(centralWidget)
@@ -439,6 +442,8 @@ class DLLabelsCT(QMainWindow):
 
     def changeAxialImageIndex(self, sliderValue):
 
+        self.brightness = 0
+        self.contrast = 1
         self.axialDICOMIndex = sliderValue
         self.updateSingleImage(imageType="axial")
 
@@ -997,6 +1002,8 @@ class DLLabelsCT(QMainWindow):
                 elif mask_stack.max() == 1:
                     mask_stack = mask_stack.astype("uint8")
                     mask_stack = mask_stack * 255
+                elif mask_stack.max() == 255:
+                    mask_stack = mask_stack.astype("uint8")
                 for slice_num, slice in enumerate(mask_stack):
                     mask_filename = study_id + "_" + str(slice_num) + ".png"
                     mask_save_path = save_dir / study_id / maskType / mask_filename
@@ -1172,6 +1179,8 @@ class DLLabelsCT(QMainWindow):
                 elif current_mask_stack.max() == 1:
                     current_mask_stack = current_mask_stack.astype("uint8")
                     current_mask_stack = current_mask_stack * 255
+                elif current_mask_stack.max() == 255:
+                    current_mask_stack = current_mask_stack.astype("uint8")
                 if any(value.isChecked() is True for value in self.agFlip.actions()) and self.saveFlipped:
                     for slice_num, current_mask_slice in enumerate(current_mask_stack):
                         mask_dir_flip = mask_dir + "_flipped"
@@ -1349,6 +1358,8 @@ class DLLabelsCT(QMainWindow):
             self.coronalImageLabel.setMinimumWidth(540)
             self.sagittalImageLabel.setMinimumWidth(540)
             self.axialImageLabel.setMinimumHeight(540)
+            self.brightness = 0
+            self.contrast = 1.0
             if imagesChanged:
                 self.axialDICOMIndex = 0
                 self.coronalDICOMIndex = 0
@@ -1469,6 +1480,10 @@ class DLLabelsCT(QMainWindow):
                 except (ValueError, IndexError):
                     self.axialDICOMIndex = 0
                     image = self.currentDICOMStack[self.axialDICOMIndex, :, :].copy()
+                image = image.astype(np.float64)
+                image = image*self.contrast + self.brightness
+                image = np.clip(image, 0, 65535)
+                image = image.astype(np.uint16)
                 h, w = image.shape
                 self.axialImageQt = QImage(image, w, h, w * 2, QImage.Format.Format_Grayscale16)
                 self.axialImageQt = QPixmap.fromImage(self.axialImageQt)
