@@ -208,6 +208,8 @@ class LabelTable(QTableWidget):
         setClassesAction.triggered.connect(self.setClasses)
         labelDrawAction = QAction("Set as drawn label", self)
         labelDrawAction.triggered.connect(self.drawnLabel)
+        showHideLabelAction = QAction("Show/hide this label", self)
+        showHideLabelAction.triggered.connect(self.showHideLabel)
         removeLabelAction = QAction("Remove this label", self)
         removeLabelAction.triggered.connect(self.removeLabel)
         resetColorAction = QAction("Reset this label's color", self)
@@ -217,6 +219,7 @@ class LabelTable(QTableWidget):
             pass
         else:
             menu.addAction(labelDrawAction)
+            menu.addAction(showHideLabelAction)
             menu.addAction(removeLabelAction)
             menu.addAction(resetColorAction)
             menu.addAction(setClassesAction)
@@ -230,6 +233,12 @@ class LabelTable(QTableWidget):
         labelName = self.item(row, 0).text()
         if labelName is not None:
             self.parent.changeDrawnLabel(labelName, row)
+
+    def showHideLabel(self):
+        row = self.row
+        labelName = self.item(row, 0).text()
+        if labelName is not None:
+            self.parent.showHideLabel(labelName, row)
 
     def removeLabel(self):
         row = self.row
