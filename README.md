@@ -18,7 +18,7 @@ The topmost sliders are used to change between different slices in the scan. The
 
 ### Using the label table
 
-Labels can be added and removed by right-clicking the table. Labels can be set as the drawn label, removed (this removes any mask drawn with this label) and the label's color reset. The last right click option, "Set label classes", sets which label is which output class in a multiclass segmentation model.  
+Labels can be added and removed by right-clicking the table. Labels can be set as the drawn label, shown/hidden, removed (this removes any mask drawn with this label) and the label's color reset. The last right click option, "Set label classes", sets which label is which output class in a multiclass segmentation model.  
 
 ### Selecting a segmentation model
 
