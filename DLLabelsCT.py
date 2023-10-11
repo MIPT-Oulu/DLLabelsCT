@@ -32,6 +32,7 @@ class DLLabelsCT(QMainWindow):
         self.currentDICOMStack = None
         self.currentMaskStack = {}
         self.maskColors = {}
+        self.hiddenLabels = []
         self.modelClasses = {}
 
         self.currentStudyID = None
@@ -628,6 +629,8 @@ class DLLabelsCT(QMainWindow):
     def changeDrawnLabel(self, labelName, row):
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        if labelName in self.hiddenLabels:
+            self.hiddenLabels.remove(labelName)
         labelAmount = len(self.currentMaskStack)
         if labelAmount == 0:
             self.statusbar.showMessage("No labels!")
@@ -638,6 +641,7 @@ class DLLabelsCT(QMainWindow):
             self.drawnMaskType = labelName
             self.axialImageScene.drawnMaskType = labelName
             self.labelTable.item(row, 0).setBackground((QColor(0, 0, 255, 80)))
+        self.updateImages()
         QApplication.restoreOverrideCursor()
 
     def changeZoom(self, act):
@@ -695,6 +699,19 @@ class DLLabelsCT(QMainWindow):
                 self.labelTable.setItem(rowPosition, 2, QTableWidgetItem(""))
                 self.labelTable.item(rowPosition, 2).setBackground(QColor(red, green, blue))
 
+    def showHideLabel(self, labelName, row):
+
+        if labelName in self.hiddenLabels:
+            self.hiddenLabels.remove(labelName)
+            self.labelTable.item(row, 0).setBackground((QColor(255, 255, 255)))
+        else:
+            self.hiddenLabels.append(labelName)
+            self.labelTable.item(row, 0).setBackground((QColor(128, 128, 128)))
+            if self.drawnMaskType == labelName:
+                self.drawnMaskType = None
+                self.axialImageScene.drawnMaskType = None
+        self.updateImages()
+
     def removeLabel(self, labelName, row):
 
         mb = QMessageBox()
@@ -705,6 +722,8 @@ class DLLabelsCT(QMainWindow):
             for i in range(self.labelTable.rowCount()):
                 self.labelTable.item(i, 1).setText("")
             self.maskColors.pop(labelName)
+            if labelName in self.hiddenLabels:
+                self.hiddenLabels.remove(labelName)
             self.currentMaskStack.pop(labelName)
             self.axialImageScene.mask.pop(labelName)
             self.modelClasses.pop(labelName)
@@ -1527,7 +1546,7 @@ class DLLabelsCT(QMainWindow):
                 p = QPainter(combination)
                 p.drawPixmap(0, 0, w, h, imageQt)
             for maskType in self.currentMaskStack:
-                if self.currentMaskStack[maskType] is not None and self.showMasks:
+                if self.currentMaskStack[maskType] is not None and self.showMasks and maskType not in self.hiddenLabels:
                     try:
                         if imageType == "axial":
                             mask = self.currentMaskStack[maskType][self.axialDICOMIndex, :, :].copy()
@@ -1572,6 +1591,8 @@ class DLLabelsCT(QMainWindow):
         p = QPainter(combinationAxial)
         p.drawPixmap(0, 0, w, h, self.axialImageQt)
         for maskType in self.currentMaskStack:
+            if maskType in self.hiddenLabels:
+                continue
             try:
                 axialMask = self.currentMaskStack[maskType][self.axialDICOMIndex, :, :].copy()
             except (ValueError, IndexError):
