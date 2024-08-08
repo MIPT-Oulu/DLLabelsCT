@@ -416,19 +416,13 @@ class DLLabelsCT(QMainWindow):
         self.gridLayout.addWidget(self.setOpacitySlider, 3, 2)
         self.setOpacitySlider.hide()
 
-        self.setMinSegmentationSlider = QSlider(Qt.Orientation.Horizontal, self)
-        self.setMinSegmentationSlider.setRange(0, 100)
-        self.setMinSegmentationSlider.setValue(0)
-        self.setMinSegmentationSlider.valueChanged[int].connect(self.changeSegmentationIndexMin)
-        self.gridLayout.addWidget(self.setMinSegmentationSlider, 4, 2)
-        self.setMinSegmentationSlider.hide()
-
-        self.setMaxSegmentationSlider = QSlider(Qt.Orientation.Horizontal, self)
-        self.setMaxSegmentationSlider.setRange(0, 100)
-        self.setMaxSegmentationSlider.setValue(100)
-        self.setMaxSegmentationSlider.valueChanged[int].connect(self.changeSegmentationIndexMax)
-        self.gridLayout.addWidget(self.setMaxSegmentationSlider, 5, 2)
-        self.setMaxSegmentationSlider.hide()
+        self.setSegmentationIndexSlider = RangeSlider(Qt.Orientation.Horizontal, self)
+        self.setSegmentationIndexSlider.setRange(0, 100)
+        self.setSegmentationIndexSlider.setLow(0)
+        self.setSegmentationIndexSlider.setHigh(100)
+        self.setSegmentationIndexSlider.sliderMoved.connect(self.changeSegmentationIndex)
+        self.gridLayout.addWidget(self.setSegmentationIndexSlider, 4, 2)
+        self.setSegmentationIndexSlider.hide()
 
     def _createStatusBar(self):
 
@@ -463,23 +457,10 @@ class DLLabelsCT(QMainWindow):
         self.maskOpacity = sliderValue
         self.updateImages()
 
-    def changeSegmentationIndexMax(self, sliderValue):
+    def changeSegmentationIndex(self, sliderLow, sliderHigh):
 
-        if sliderValue <= self.setMinSegmentationSlider.value():
-            self.setMaxSegmentationSlider.setValue(self.setMinSegmentationSlider.value() + 1)
-
-        self.indexesToSegment = list(range(self.setMinSegmentationSlider.value(), self.setMaxSegmentationSlider.value() + 1))
-
-        self.segmentationIndexLabel.setText(f"Slices to segment: {self.setMinSegmentationSlider.value()} - {self.setMaxSegmentationSlider.value()}")
-
-    def changeSegmentationIndexMin(self, sliderValue):
-
-        if sliderValue >= self.setMaxSegmentationSlider.value():
-            self.setMinSegmentationSlider.setValue(self.setMaxSegmentationSlider.value() - 1)
-
-        self.indexesToSegment = list(range(self.setMinSegmentationSlider.value(), self.setMaxSegmentationSlider.value() + 1))
-
-        self.segmentationIndexLabel.setText(f"Slices to segment:  {self.setMinSegmentationSlider.value()} - {self.setMaxSegmentationSlider.value()}")
+        self.indexesToSegment = list(range(sliderLow, sliderHigh + 1))
+        self.segmentationIndexLabel.setText(f"Slices to segment: {sliderLow} - {sliderHigh}")
 
     def changeWindowing(self, act):
 
@@ -869,9 +850,8 @@ class DLLabelsCT(QMainWindow):
                         self.currentSegmentationModelPathLabel.setText(labelText)
                         self.segmentationModelType = str(Path(self.segmentationModelFolderPath).parents[0].name).lower()
                         self.doSegmentationButton.show()
-                        self.setMinSegmentationSlider.show()
-                        self.setMaxSegmentationSlider.show()
-                        self.segmentationIndexLabel.setText(f"Slices to segment: {self.setMinSegmentationSlider.value()} - {self.setMaxSegmentationSlider.value()}")
+                        self.setSegmentationIndexSlider.show()
+                        self.segmentationIndexLabel.setText(f"Slices to segment: {self.setSegmentationIndexSlider.low()} - {self.setSegmentationIndexSlider.high()}")
                         self.segmentationIndexLabel.show()
                 except TypeError:
                     self.statusbar.showMessage("No model(s) found")
@@ -1439,10 +1419,9 @@ class DLLabelsCT(QMainWindow):
             if self.showMasks:
                 self.setOpacitySlider.show()
 
-            self.setMinSegmentationSlider.setRange(0, len(self.dicoms) - 1)
-            self.setMaxSegmentationSlider.setRange(0, len(self.dicoms) - 1)
-            self.setMinSegmentationSlider.setValue(0)
-            self.setMaxSegmentationSlider.setValue(len(self.dicoms) - 1)
+            self.setSegmentationIndexSlider.setRange(0, len(self.dicoms) - 1)
+            self.setSegmentationIndexSlider.setLow(0)
+            self.setSegmentationIndexSlider.setHigh(len(self.dicoms) - 1)
             if self.scaleChanged:
                 self.axialImageLabel.resetTransform()
                 self.coronalImageLabel.resetTransform()
