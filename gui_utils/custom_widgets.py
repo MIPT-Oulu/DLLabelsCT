@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QGraphicsScene, QApplication, QPushButton, QLineEdit, QVBoxLayout, QFormLayout, QDialog, QGridLayout, QDialogButtonBox, QTableWidget, QHeaderView, QMenu, QAbstractItemView, QSizePolicy, QStyle, QStyleOptionSlider, QSlider
-from PyQt6.QtGui import QIntValidator, QAction, QCursor, QPen, QBrush, QPainter, QPalette
+from PyQt6.QtGui import QIntValidator, QAction, QCursor, QPen, QBrush, QPainter, QPalette, QColor
 from PyQt6.QtCore import Qt, QRect, QPoint, pyqtSignal
 
 from gui_utils.drawing_utils import *
@@ -13,6 +13,7 @@ class CTGraphicsScene(QGraphicsScene):
         self.imageType = imageType
         self.drawing = False
         self.adjusting = False
+        self.measuring = False
         self.maskShown = True
         self.mask = reset_mask_stack(self.parent.currentMaskStack)
         self.drawingSize = 7
@@ -23,6 +24,7 @@ class CTGraphicsScene(QGraphicsScene):
         self.currentMaskIndex = 0
         self.adjustX = None
         self.adjustY = None
+        self.measureLine = None
 
     def createMask(self, maskType):
         self.mask[maskType] = np.zeros(self.parent.currentDICOMStack.shape)
@@ -95,14 +97,19 @@ class CTGraphicsScene(QGraphicsScene):
                         self.parent.axialSlider.setValue(y)
                         self.parent.coronalSlider.setValue(x)
                         self.parent.updateImages()
-            elif event.button() == Qt.MouseButton.RightButton and self.imageType == "axial" and not self.drawing:
+                elif self.parent.clickType["Measuring"]:
+                    if self.imageType == "axial":
+                        self.adjustX = int(event.scenePos().x())
+                        self.adjustY = int(event.scenePos().y())
+                        self.measuring = True
+            elif event.button() == Qt.MouseButton.RightButton and self.imageType == "axial" and self.adjusting:
                 self.adjustX = int(event.scenePos().x())
                 self.adjustY = int(event.scenePos().y())
                 self.adjusting = True
 
     def wheelEvent(self, event):
         modifiers = QApplication.keyboardModifiers()
-        if not self.drawing and not self.adjusting and bool(modifiers == Qt.KeyboardModifier.ControlModifier):
+        if not self.drawing and not self.adjusting and not self.measuring and bool(modifiers == Qt.KeyboardModifier.ControlModifier):
             if event.delta() > 0:
                 self.zoomIn()
             elif event.delta() < 0:
@@ -125,6 +132,22 @@ class CTGraphicsScene(QGraphicsScene):
                     self.parent.brightness += xChange * 1
                 if self.parent.contrast > 0 or (self.parent.contrast <= 0 < yChange):
                     self.parent.contrast += yChange * 0.0001
+            elif self.measuring and x >= 0 and y >= 0 and x < self.parent.currentDICOMStack.shape[2] and y < self.parent.currentDICOMStack.shape[1] and self.adjustX is not None and self.adjustY is not None:
+                xChange = abs(x - self.adjustX)
+                yChange = abs(self.adjustY - y)
+                currentDICOMIndex = self.parent.axialDICOMIndex
+                pixelSpacingX = self.parent.pixelSpacingX[str(currentDICOMIndex)]
+                pixelSpacingY = self.parent.pixelSpacingY[str(currentDICOMIndex)]
+                mmChangeX = xChange * pixelSpacingX
+                mmChangeY = yChange * pixelSpacingY
+                measuredLength = (mmChangeX**2 + mmChangeY**2)**0.5
+                self.parent.statusbar.showMessage(f"{measuredLength}")
+                if self.measureLine is None:
+                    measurePen = QPen()
+                    measurePen.setColor(QColor(32, 128, 64))
+                    self.measureLine = self.addLine(x, y, self.adjustX, self.adjustY, pen=measurePen)
+                else:
+                    self.measureLine.setLine(x, y, self.adjustX, self.adjustY)
 
     def mouseReleaseEvent(self, event):
         if self.drawing:
@@ -135,6 +158,11 @@ class CTGraphicsScene(QGraphicsScene):
         if self.adjusting:
             self.adjusting = False
             self.parent.updateImages()
+        if self.measuring:
+            if self.measureLine is not None:
+                self.removeItem(self.measureLine)
+                self.measureLine = None
+            self.measuring = False
 
     def zoomIn(self):
         if self.parent.imageScale == 1.0:
