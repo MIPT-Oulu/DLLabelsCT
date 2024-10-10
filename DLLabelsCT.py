@@ -29,6 +29,8 @@ class DLLabelsCT(QMainWindow):
         self.sagittalDICOMIndex = 0
         self.dicomWindowCenter = 50
         self.dicomWindowWidth = 400
+        self.pixelSpacingX = {}
+        self.pixelSpacingY = {}
         self.currentDICOMStack = None
         self.currentMaskStack = {}
         self.maskColors = {}
@@ -56,7 +58,7 @@ class DLLabelsCT(QMainWindow):
         self.flip = {"Axial": False, "Coronal": False, "Sagittal": False}
         self.axialImageQt = None
 
-        self.clickType = {"Selecting": True, "Dragging": False, "Drawing": False, "Erasing": False}
+        self.clickType = {"Selecting": True, "Dragging": False, "Drawing": False, "Erasing": False, "Measuring": False}
         self.erasingOrDrawing = 1
 
         self.scaleChanged = False
@@ -235,17 +237,21 @@ class DLLabelsCT(QMainWindow):
         selectErasingAct.setShortcut(QKeySequence("E"))
         selectDraggingAct = QAction('Dragging', self, checkable=True)
         selectDraggingAct.setShortcut(QKeySequence("F"))
+        selectMeasuringAct = QAction('Measuring', self, checkable=True)
+        selectMeasuringAct.setShortcut(QKeySequence("G"))
         agDrawErase = QActionGroup(self)
         selecting = agDrawErase.addAction(selectSelectingAct)
         drawing = agDrawErase.addAction(selectDrawingAct)
         erasing = agDrawErase.addAction(selectErasingAct)
         dragging = agDrawErase.addAction(selectDraggingAct)
+        measuring = agDrawErase.addAction(selectMeasuringAct)
         agDrawErase.setExclusive(True)
         selecting.setChecked(True)
         drawingMenu.addAction(selecting)
         drawingMenu.addAction(drawing)
         drawingMenu.addAction(erasing)
         drawingMenu.addAction(dragging)
+        drawingMenu.addAction(measuring)
         drawingMenu.addSeparator()
         agDrawErase.triggered.connect(self.changeDrawingErasing)
         select1x1Act = QAction('1x1', self, checkable=True)
@@ -1338,13 +1344,22 @@ class DLLabelsCT(QMainWindow):
                     out = adjust_image(ds, self.dicomWindowCenter, self.dicomWindowWidth)
                     if i == 0:
                         self.currentDICOMStack = np.zeros((len(self.dicoms), out.shape[0], out.shape[1]))
+                        self.pixelSpacingX = {}
+                        self.pixelSpacingY = {}
+
                     if self.useFileOrder:
                         self.currentDICOMStack[i, :, :] = out.astype(np.uint16)
+                        self.pixelSpacingX[str(i)] = float(ds.PixelSpacing[0])
+                        self.pixelSpacingY[str(i)] = float(ds.PixelSpacing[1])
                     else:
                         try:
                             self.currentDICOMStack[ds.InstanceNumber-1, :, :] = out.astype(np.uint16)
+                            self.pixelSpacingX[str(ds.InstanceNumber-1)] = float(ds.PixelSpacing[0])
+                            self.pixelSpacingY[str(ds.InstanceNumber-1)] = float(ds.PixelSpacing[1])
                         except AttributeError:
                             self.currentDICOMStack[i, :, :] = out.astype(np.uint16)
+                            self.pixelSpacingX[str(i)] = float(ds.PixelSpacing[0])
+                            self.pixelSpacingY[str(i)] = float(ds.PixelSpacing[1])
                         except IndexError:
                             self.statusbar.showMessage("Invalid DICOM index!")
                             continue
