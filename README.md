@@ -61,6 +61,7 @@ Menubar options:
   - Drawing: Clicking and dragging draws the currently selected label on the mask
   - Erasing: Clicking and dragging erases the currently selected label from the mask
   - Dragging: Clicking and dragging moves the view
+  - Measuring: Clicking and dragging measures the distance in millimeters (works only on axial image)
   - NxN: Selects the drawing size
   - Circle/Square: Selects the drawing shape
 - Zoom: Zoom in/out of the images
@@ -79,6 +80,7 @@ Menubar options:
 - S - Mouse left click to "select" mode
 - D - Mouse left click to "draw" mode
 - F - Mouse left click to "drag" mode
+- G - Mouse left click to "measure" mode
 - 1 - Draw 1x1 size shapes
 - 2 - Draw 3x3 size shapes
 - 3 - Draw 5x5 size shapes
