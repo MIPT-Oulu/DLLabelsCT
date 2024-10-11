@@ -102,7 +102,7 @@ class CTGraphicsScene(QGraphicsScene):
                         self.adjustX = int(event.scenePos().x())
                         self.adjustY = int(event.scenePos().y())
                         self.measuring = True
-            elif event.button() == Qt.MouseButton.RightButton and self.imageType == "axial" and self.adjusting:
+            elif event.button() == Qt.MouseButton.RightButton and self.imageType == "axial" and not self.drawing and not self.measuring:
                 self.adjustX = int(event.scenePos().x())
                 self.adjustY = int(event.scenePos().y())
                 self.adjusting = True
