@@ -109,4 +109,24 @@ The software has not been certified as a medical device and, therefore, must not
 
 ## How to cite
 
-If you found this work useful, consider citing the repository
+If you found this work useful, consider citing the article:
+
+Mustonen H, Isosalo A, Nortunen M, Nevalainen M, Nieminen MT, Huhta H (2024) DLLabelsCT: Annotation tool using deep transfer learning to assist in creating new datasets from abdominal computed tomography scans, case study: Pancreas. PLoS ONE 19(12): e0313126. https://doi.org/10.1371/journal.pone.0313126
+
+BibTeX:
+
+@ARTICLE{Mustonen2024-nd,
+  title    = "{DLLabelsCT}: Annotation tool using deep transfer learning to
+              assist in creating new datasets from abdominal computed
+              tomography scans, case study: Pancreas",
+  author   = "Mustonen, Henrik and Isosalo, Antti and Nortunen, Minna and
+              Nevalainen, Mika and Nieminen, Miika T and Huhta, Heikki",
+  journal  = "PLoS One",
+  volume   =  19,
+  number   =  12,
+  pages    = "e0313126",
+  doi      = "10.1371/journal.pone.0313126",
+  month    =  dec,
+  year     =  2024,
+  language = "en"
+}
